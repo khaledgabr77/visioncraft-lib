@@ -4,10 +4,6 @@
 #include <fstream>
 
 
-
-
-
-
 void free_image(image img){
     // Deallocate the memory for the image data.
     // This is a common pattern in C and C++ to prevent memory leaks.
@@ -78,4 +74,27 @@ void set_pixel(image img, int channel, int width, int height, float value){
     int index = channel *(img.width * img.height) + height * img.width + width;
     img.data[index] = value;
 
+}
+
+image copy_image(image img)
+{
+    // Create a new image with the same dimensions and channels as the input image
+    image copy = create_image(img.width, img.height, img.channels);
+
+    // Calculate the total number of elements in the data array
+    int total_size = img.width * img.height * img.channels;
+    
+    // Copy the data from the original image to the copy image.
+    // Copy each element manually
+    if (img.data != nullptr) {
+        for (int i = 0; i < total_size; ++i) {
+            copy.data[i] = img.data[i];
+        }
+    }
+
+    // // Use std::memcpy to copy the data from the input image to the new image
+    // if (img.data != nullptr) {
+    //     std::memcpy(copy.data, img.data, total_size * sizeof(float));
+    // }
+    return copy;
 }

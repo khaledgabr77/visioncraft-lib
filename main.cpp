@@ -34,6 +34,13 @@ int main() {
         save_image(loaded_image, output_path);
         std::cout << "Saved the image as " << output_path << ".jpg" << std::endl;
 
+        // // Test copying an image
+        image copied_image = copy_image(loaded_image);
+        std::cout << "Copied image with dimensions: " 
+                  << copied_image.width << "x" 
+                  << copied_image.height 
+                  << " and channels: " << copied_image.channels << std::endl;
+
         // // Test freeing images
         free_image(img);
         free_image(loaded_image);

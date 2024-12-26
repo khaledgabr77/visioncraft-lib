@@ -14,7 +14,7 @@ image create_image(int width, int height, int channels);
 void free_image(image img);
 float get_pixel(image img, int channel, int width, int height);
 void set_pixel(image img, int channel, int width, int height, float value);
-// copy_image();
+image copy_image(image im);
 // make_image();
 // rgb_to_grayscale();
 // shift_image();
