@@ -1,0 +1,8 @@
+{
+    "ros.distro": "jazzy",
+    "files.associations": {
+        "iostream": "cpp",
+        "cstring": "cpp",
+        "fstream": "cpp"
+    }
+}
