@@ -4,13 +4,17 @@
 extern image load_image(char *filename);
 extern void save_image(image im, const char *name);
 extern void free_image(image im);
+extern void save_png(image im, const char *name);
+extern void save_image_binary(image im, const char *fname);
+extern image load_image_binary(const char *fname);
 
 int main() {
+
     try {
         // Test creating an image
         int width = 4, height = 4, channels = 3;
-        image img = create_image(width, height, channels);
-        // img.data[0] = 0.0f;
+        image img = create_image(channels, height, width);
+
         std::cout << "Created an image with dimensions: " 
                   << img.width << "x" << img.height 
                   << " and channels: " << img.channels 
@@ -22,33 +26,27 @@ int main() {
         std::cout << "Pixel value at (0, 0, 0): " << pixel_value << std::endl;
 
         // // Test loading an image
-        char image_path[] = "../boy.jpg"; // Replace with an actual image path
-        image loaded_image = load_image(image_path);
-        std::cout << "Loaded an image with dimensions: " 
-                  << loaded_image.width << "x" 
-                  << loaded_image.height 
-                  << " and channels: " << loaded_image.channels << std::endl;
-
+        char image_path[] = "dog.jpg"; 
+        image gray_image = load_image(image_path);
+        
         // // Test saving an image
-        const char *output_path = "output_image";
-        save_image(loaded_image, output_path);
-        std::cout << "Saved the image as " << output_path << ".jpg" << std::endl;
+        image graybar = rgb_to_grayscale(gray_image);
+        save_image(graybar, "gray_dog");
 
-        // // Test copying an image
-        image copied_image = copy_image(loaded_image);
-        std::cout << "Copied image with dimensions: " 
-                  << copied_image.width << "x" 
-                  << copied_image.height 
-                  << " and channels: " << copied_image.channels << std::endl;
-
+        shift_image(gray_image, 0, 0.4f);
+        shift_image(gray_image, 1, 0.4f);
+        shift_image(gray_image, 2, 0.4f);
+        save_image(gray_image, "shifted_dog");
         // // Test freeing images
         free_image(img);
-        free_image(loaded_image);
+        free_image(gray_image);
         std::cout << "Freed allocated images." << std::endl;
 
     } catch (const std::exception &e) {
         std::cerr << "An error occurred: " << e.what() << std::endl;
     }
+
+
 
     return 0;
 }

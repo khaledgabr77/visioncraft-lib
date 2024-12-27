@@ -12,7 +12,7 @@ void free_image(image img){
     img.data = nullptr;
 }
 
-image create_empty_image(int width, int height, int channels){
+image create_empty_image(int channels, int height, int width){
     // Create an image struct with the given width, height, and channels.
     // Return the created image.
     image img;
@@ -26,10 +26,10 @@ image create_empty_image(int width, int height, int channels){
 }
 
 
-image create_image(int width, int height, int channels){
+image create_image(int channels, int height, int width){
     // Call create_empty_image to handle allocation and initialization
     // Return the created image.
-    image img = create_empty_image(width, height, channels);
+    image img = create_empty_image(channels, height, width);
     
     int total_size = width * height * channels;
     img.data = new float[total_size];
@@ -38,7 +38,7 @@ image create_image(int width, int height, int channels){
     
 }
 
-float get_pixel(image img, int channel, int width, int height){
+float get_pixel(image img, int channel, int height, int width){
     
     // Clamp the width and height to the size of the image.
     // This is a common trick to handle coordinates outside of the image.
@@ -60,7 +60,7 @@ float get_pixel(image img, int channel, int width, int height){
     return img.data[index];
 }
 
-void set_pixel(image img, int channel, int width, int height, float value){
+void set_pixel(image img, int channel, int height, int width, float value){
     
     // Check if the provided coordinates are within valid bounds
     if (channel < 0 || channel >= img.channels || width < 0 || width >= img.width || height < 0 || height >= img.height) {
@@ -79,10 +79,10 @@ void set_pixel(image img, int channel, int width, int height, float value){
 image copy_image(image img)
 {
     // Create a new image with the same dimensions and channels as the input image
-    image copy = create_image(img.width, img.height, img.channels);
+    image copy = create_image(img.channels, img.height, img.width);
 
     // Calculate the total number of elements in the data array
-    int total_size = img.width * img.height * img.channels;
+    int total_size = img.channels * img.height * img.width;
     
     // Copy the data from the original image to the copy image.
     // Copy each element manually
@@ -97,4 +97,55 @@ image copy_image(image img)
     //     std::memcpy(copy.data, img.data, total_size * sizeof(float));
     // }
     return copy;
+}
+
+image rgb_to_grayscale(image img) {
+
+    // Create a new grayscale image with a single channel
+    image gray_image = create_image(1, img.height, img.width);
+    // Calculate the offset for each channel in planar layout
+    int next_channel = img.width * img.height;
+
+    // Convert RGB to grayscale
+    for (int i = 0; i < img.height; ++i) {
+        for (int j = 0; j < img.width; ++j) {
+            // Calculate pixel index
+            int idx = i * img.width + j;
+
+            // Access R, G, B values from their respective channel offsets
+            float r = img.data[idx];
+            float g = img.data[idx + next_channel];
+            float b = img.data[idx + 2 * next_channel];
+
+            // Apply the grayscale formula
+            gray_image.data[idx] = 0.299f * r + 0.587f * g + 0.114f * b;
+        }
+    }
+
+    return gray_image;
+}
+
+void shift_image(image img, int channel, float value) {
+    /**
+    Function: Shifts a specific color channel by a given value.
+    Args:
+        img: Input image with planar channel layout.
+        channel: The channel index to shift (0 for R, 1 for G, 2 for B).
+        value: The value to add to the specified channel.
+    */
+
+
+    // Calculate the offset for the specified channel
+    int next_channel = img.width * img.height;
+    int channel_offset = channel * next_channel;
+
+    // Shift the specified channel
+    for (int i = 0; i < img.height; i++) {
+        for (int j = 0; j < img.width; j++) {
+            int idx = i * img.width + j;
+
+            // Add the value to the specified channel
+            img.data[idx + channel_offset] += value;
+        }
+    }
 }
