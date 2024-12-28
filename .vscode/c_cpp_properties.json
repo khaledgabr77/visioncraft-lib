@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}",
-                "/usr/include/pcl-1.14/pcl/io"
+                "/usr/include/pcl-1.14/pcl/io",
+                "/usr/include/opencv4"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

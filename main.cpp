@@ -30,12 +30,18 @@ int main() {
         image gray_image = load_image(image_path);
         
         // // Test saving an image
-        image graybar = rgb_to_grayscale(gray_image);
-        save_image(graybar, "gray_dog");
+        // image graybar = rgb_to_grayscale(gray_image);
+        // save_image(graybar, "gray_dog");
 
-        shift_image(gray_image, 0, 0.4f);
-        shift_image(gray_image, 1, 0.4f);
-        shift_image(gray_image, 2, 0.4f);
+        // shift_image(gray_image, 0, 0.4f);
+        // shift_image(gray_image, 1, 0.4f);
+        // shift_image(gray_image, 2, 0.4f);
+        
+        // clamp_image(gray_image);
+        rgb_to_hsv(gray_image);
+        scale_image(gray_image, 1, 2);
+        clamp_image(gray_image);
+        hsv_to_rgb(gray_image);
         save_image(gray_image, "shifted_dog");
         // // Test freeing images
         free_image(img);

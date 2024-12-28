@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstring>
 #include <fstream>
+#include <cmath>
 
 
 void free_image(image img){
@@ -44,7 +45,7 @@ float get_pixel(image img, int channel, int height, int width){
     // This is a common trick to handle coordinates outside of the image.
     // It's useful for making sure you don't try to access a pixel outside of the image.
     int clamped_width = std::clamp(width, 0, img.width - 1);
-    int clamped_height = std::clamp(height, 0, img.height);
+    int clamped_height = std::clamp(height, 0, img.height - 1);
 
     // Validate channel bounds
     if (channel < 0 || channel >= img.channels){
@@ -149,3 +150,140 @@ void shift_image(image img, int channel, float value) {
         }
     }
 }
+
+void clamp_image(image img){
+
+    int total_size = img.width * img.height * img.channels;
+
+    for(int i=0; i < total_size; i++){
+        img.data[i] = std::clamp(img.data[i], 0.f, 1.f);
+
+        // if (img.data[i] < 0.f) img.data[i] = 0.f;
+        // else if (img.data[i] > 1.f) img.data[i] = 1.f;
+    }
+    
+}
+float three_way_max(float a, float b, float c){
+    return (a > b) ? ( (a > c) ? a : c) : ((b > c) ? b : c);
+}
+    
+
+float three_way_min(float a, float b, float c){
+    return (a < b) ? ( (a < c) ? a : c) : ((b < c) ? b : c);
+}
+
+void rgb_to_hsv(image img) {
+    float H, S, V;  // Hue, Saturation, Value
+    float C, H_ = 0;  // Chroma and intermediate Hue
+    float R, G, B;  // Red, Green, Blue components
+
+    for (int i = 0; i < img.height; i++) {
+        for (int j = 0; j < img.width; j++) {
+            // Retrieve pixel values
+            R = get_pixel(img, 0, i, j);
+            G = get_pixel(img, 1, i, j);
+            B = get_pixel(img, 2, i, j);
+
+            // Calculate Value (V), Chroma (C), and Minimum (m)
+            V = three_way_max(R, G, B);
+            float m = three_way_min(R, G, B);
+            C = V - m;
+
+            // Calculate Saturation (S)
+            S = (V == 0) ? 0 : (C / V);
+
+            // Calculate Hue (H)
+            if (C == 0) {
+                H_ = 0;  // Undefined Hue
+            } else if (V == R) {
+                H_ = (G - B) / C;
+            } else if (V == G) {
+                H_ = (B - R) / C + 2;
+            } else if (V == B) {
+                H_ = (R - G) / C + 4;
+            }
+
+            // Normalize Hue to range [0, 1]
+            if (H_ < 0) {
+                H = H_ / 6 + 1;
+            } else {
+                H = H_ / 6;
+            }
+
+            // Set pixel values for HSV
+            set_pixel(img, 0, i, j, H);
+            set_pixel(img, 1, i, j, S);
+            set_pixel(img, 2, i, j, V);
+        }
+    }
+}
+
+void hsv_to_rgb(image img) {
+    float H, S, V;  // Hue, Saturation, Value
+    float R, G, B;  // Red, Green, Blue
+    float C, X, m;  // Chroma, secondary component, and match value
+
+    for (int i = 0; i < img.height; i++) {
+        for (int j = 0; j < img.width; j++) {
+            // Retrieve HSV values
+            H = get_pixel(img, 0, i, j);  // Hue [0, 1]
+            S = get_pixel(img, 1, i, j);  // Saturation [0, 1]
+            V = get_pixel(img, 2, i, j);  // Value [0, 1]
+
+            // Calculate Chroma (C), Secondary component (X), and Match value (m)
+            C = V * S;
+            X = C * (1 - fabs(fmod(H * 6, 2) - 1));
+            m = V - C;
+
+            // Determine RGB values based on Hue sector
+            if (H >= 0 && H < 1.0 / 6) {       // Sector 0
+                R = C;
+                G = X;
+                B = 0;
+            } else if (H < 2.0 / 6) {          // Sector 1
+                R = X;
+                G = C;
+                B = 0;
+            } else if (H < 3.0 / 6) {          // Sector 2
+                R = 0;
+                G = C;
+                B = X;
+            } else if (H < 4.0 / 6) {          // Sector 3
+                R = 0;
+                G = X;
+                B = C;
+            } else if (H < 5.0 / 6) {          // Sector 4
+                R = X;
+                G = 0;
+                B = C;
+            } else {                           // Sector 5
+                R = C;
+                G = 0;
+                B = X;
+            }
+
+            // Add match value to shift [0, 1] range to [m, V]
+            R += m;
+            G += m;
+            B += m;
+
+            // Set RGB values back into the image
+            set_pixel(img, 0, i, j, R);
+            set_pixel(img, 1, i, j, G);
+            set_pixel(img, 2, i, j, B);
+        }
+    }
+}
+
+
+void scale_image(image img, int channel, float value){
+
+    float pixel;
+    for (int i = 0; i < img.height; i++){
+        for (int j = 0; j < img.width; j++){
+            pixel = get_pixel(img, channel, i, j);
+            set_pixel(img, channel, i, j, pixel * value);
+
+            }
+        }
+    }
