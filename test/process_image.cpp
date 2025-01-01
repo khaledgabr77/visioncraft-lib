@@ -286,4 +286,64 @@ void scale_image(image img, int channel, float value){
 
             }
         }
+}
+
+
+
+float nn_interpolate(image img, int channel, float row, float col) {
+    // Scale the target coordinates to original image space
+    float original_x = col;
+    float original_y = row;
+
+    // Find the nearest neighbor in the original image
+    int nearest_x = static_cast<int>(std::round(original_x));
+    int nearest_y = static_cast<int>(std::round(original_y));
+
+    // Clamp coordinates to ensure they're within bounds
+    nearest_x = std::clamp(nearest_x, 0, img.width - 1);
+    nearest_y = std::clamp(nearest_y, 0, img.height - 1);
+
+    // Return the pixel value from the original image
+    return get_pixel(img, channel, nearest_y, nearest_x);
+}
+
+
+image nn_resize(image img, int new_height, int new_width) {
+    // Create a new image with the specified dimensions
+    image new_image = create_image(img.channels, new_height, new_width);
+
+    // Scaling factors for mapping new coordinates to original image space
+    float scale_x = static_cast<float>(img.width - 1) / (new_width - 1);
+    float scale_y = static_cast<float>(img.height - 1) / (new_height - 1);
+
+    for (int i = 0; i < new_height; i++) {
+        for (int j = 0; j < new_width; j++) {
+            for (int c = 0; c < img.channels; c++) {
+                // Compute original coordinates
+                float row = i * scale_y;
+                float col = j * scale_x;
+
+                // Use nn_interpolate to get the interpolated pixel value
+                float pixel_value = nn_interpolate(img, c, row, col);
+
+                // Set the computed pixel value in the new image
+                set_pixel(new_image, c, i, j, pixel_value);
+            }
+        }
     }
+
+    return new_image;
+}
+
+
+// float bilinear_interpolate(image im, int c, float h, float w)
+// {
+//     // TODO
+//     return 0;
+// }
+
+// image bilinear_resize(image im, int h, int w)
+// {
+//     // TODO
+//     return create_image(1,1,1); // <- probably delete this
+// }
