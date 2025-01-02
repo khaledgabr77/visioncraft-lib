@@ -26,7 +26,7 @@ int main() {
         // std::cout << "Pixel value at (0, 0, 0): " << pixel_value << std::endl;
 
         // // Test loading an image
-        char image_path[] = "dog.jpg"; 
+        char image_path[] = "dogsmall.jpg"; 
         image gray_image = load_image(image_path);
         
          
@@ -46,22 +46,26 @@ int main() {
         // save_image(gray_image, "shifted_dog");
 
         // Create a sample image (e.g., 3x3 grayscale with 1 channel)
-        image img = create_image(1, 3, 3);
-        for (int i = 0; i < 9; i++) {
-            img.data[i] = i + 1; // Fill with values from 1 to 9
-        }
+        // image img = create_image(1, 3, 3);
+        // for (int i = 0; i < 9; i++) {
+        //     img.data[i] = i + 1; // Fill with values from 1 to 9
+        // }
 
-        // Resize the image to 6x6
-        image resized = nn_resize(img, 6, 6);
+        // // Resize the image to 6x6
+        // image resized = nn_resize(img, 6, 6);
 
-        // Print the resized image
-        for (int i = 0; i < resized.height; i++) {
-            for (int j = 0; j < resized.width; j++) {
-                std::cout << get_pixel(resized, 0, i, j) << " ";
-            }
-            std::cout << "\n";
-        }
+        // // Print the resized image
+        // for (int i = 0; i < resized.height; i++) {
+        //     for (int j = 0; j < resized.width; j++) {
+        //         std::cout << get_pixel(resized, 0, i, j) << " ";
+        //     }
+        //     std::cout << "\n";
+        // }
 
+        image a = nn_resize(gray_image, gray_image.height*4, gray_image.width*4);
+        image b = bilinear_resize(gray_image, gray_image.height*4, gray_image.width*4);
+        save_image(a,"dog4x-nn");
+        save_image(b,"bilinear_dog");
 
         // // Test freeing images
         free_image(gray_image);

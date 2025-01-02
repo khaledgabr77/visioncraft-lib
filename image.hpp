@@ -25,4 +25,6 @@ void rgb_to_hsv(image im);
 void hsv_to_rgb(image img);
 void scale_image(image img, int channel, float value);
 float nn_interpolate(image img, int channel, float height, float width);
-image nn_resize(image img, int new_height, int new_width);
+image nn_resize(image img, int height, int width);
+float bilinear_interpolate(image img, int channel, float height, float width);
+image bilinear_resize(image img, int height, int width);

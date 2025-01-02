@@ -313,8 +313,8 @@ image nn_resize(image img, int new_height, int new_width) {
     image new_image = create_image(img.channels, new_height, new_width);
 
     // Scaling factors for mapping new coordinates to original image space
-    float scale_x = static_cast<float>(img.width - 1) / (new_width - 1);
-    float scale_y = static_cast<float>(img.height - 1) / (new_height - 1);
+    float scale_x = static_cast<float>(img.width) / (new_width);
+    float scale_y = static_cast<float>(img.height) / (new_height);
 
     for (int i = 0; i < new_height; i++) {
         for (int j = 0; j < new_width; j++) {
@@ -335,15 +335,62 @@ image nn_resize(image img, int new_height, int new_width) {
     return new_image;
 }
 
+float bilinear_interpolate(image img, int c, float h, float w)
+{
+    // Find the integer coordinates of the top-left corner
+    int x1 = static_cast<int>(std::floor(w));
+    int y1 = static_cast<int>(std::floor(h));
 
-// float bilinear_interpolate(image im, int c, float h, float w)
-// {
-//     // TODO
-//     return 0;
-// }
+    // Find the integer coordinates of the bottom-right corner
+    int x2 = x1 + 1;
+    int y2 = y1 + 1;
 
-// image bilinear_resize(image im, int h, int w)
-// {
-//     // TODO
-//     return create_image(1,1,1); // <- probably delete this
-// }
+    // Clamp coordinates to be within the image bounds
+    x1 = std::clamp(x1, 0, img.width - 1);
+    y1 = std::clamp(y1, 0, img.height - 1);
+    x2 = std::clamp(x2, 0, img.width - 1);
+    y2 = std::clamp(y2, 0, img.height - 1);
+
+    // Calculate the fractional parts
+    float a = w - x1;
+    float b = h - y1;
+
+    // Fetch the pixel values at the four surrounding points
+    float I11 = get_pixel(img, c, y1, x1);
+    float I21 = get_pixel(img, c, y1, x2);
+    float I12 = get_pixel(img, c, y2, x1);
+    float I22 = get_pixel(img, c, y2, x2);
+
+    // Perform bilinear interpolation
+    return (1 - a) * (1 - b) * I11 + a * (1 - b) * I21 + (1 - a) * b * I12 + a * b * I22;
+}
+
+image bilinear_resize(image img, int new_height, int new_width)
+{
+    // Create a new image with the specified dimensions
+    image resized_img = create_image(img.channels, new_height, new_width);
+
+    // Scaling factors for mapping new coordinates to original image space
+    float scale_x = static_cast<float>(img.width) / new_width;
+    float scale_y = static_cast<float>(img.height) / new_height;
+
+    // Loop over each pixel in the resized image
+    for (int i = 0; i < new_height; ++i) {
+        for (int j = 0; j < new_width; ++j) {
+            for (int c = 0; c < img.channels; ++c) {
+                // Compute the original floating-point coordinates
+                float original_x = j * scale_x;
+                float original_y = i * scale_y;
+
+                // Use bilinear_interpolate to compute the pixel value
+                float pixel_value = bilinear_interpolate(img, c, original_y, original_x);
+
+                // Set the interpolated pixel value in the new image
+                set_pixel(resized_img, c, i, j, pixel_value);
+            }
+        }
+    }
+
+    return resized_img;
+}
+
