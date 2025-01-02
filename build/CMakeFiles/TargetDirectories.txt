@@ -1,3 +1,0 @@
-/home/khaled/computer_vision/cvip_cpp/img_lib/build/CMakeFiles/img_lib_system.dir
-/home/khaled/computer_vision/cvip_cpp/img_lib/build/CMakeFiles/edit_cache.dir
-/home/khaled/computer_vision/cvip_cpp/img_lib/build/CMakeFiles/rebuild_cache.dir

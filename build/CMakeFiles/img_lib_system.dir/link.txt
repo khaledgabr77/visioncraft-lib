@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/img_lib_system.dir/main.cpp.o CMakeFiles/img_lib_system.dir/load_image.cpp.o CMakeFiles/img_lib_system.dir/test/process_image.cpp.o -o img_lib_system 
